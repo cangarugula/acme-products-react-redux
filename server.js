@@ -21,17 +21,21 @@ app.get('/api/products', (req,res,next) => {
     .then( products => res.send(products) )
 })
 
+app.get('/api/products/:id', (req,res,next) => {
+  Product.findById(req.params.id)
+    .then(product => res.send(product))
+})
+
 app.post('/api/products/create', (req,res,next) => {
   Product.create(req.body)
     .then(product => res.send(product))
 })
 
 app.delete('/api/products/:id', (req,res,next) => {
-  return Product.destroy({
-    where: {
-      id: req.params.id
-    }
-  })
+  Product.findById(req.params.id)
+    .then((product) => product.destroy())
+    .then(()=> res.sendStatus(204))
+    .catch(next)
 })
 
 app.listen(port, ()=> console.log(`listening on port: ${port}`))

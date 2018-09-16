@@ -10,11 +10,13 @@ import thunk from 'redux-thunk'
  const DELETE_PRODUCT = 'DELETE_PRODUCT'
 
 
+
  // action creators
 
 const loadProducts = (products)=> ({type: LOAD_PRODUCTS, products})
 const createProduct = (product) => ({type: CREATE_PRODUCT, product})
 const deleteProduct = (product) => ({type: DELETE_PRODUCT, product})
+
 
 // thunks
 
@@ -35,24 +37,48 @@ const _createProduct = (product) => {
 const _deleteProduct = (product) => {
   return (dispatch) => {
     axios.delete(`/api/products/${product.id}`)
-      .then(()=> dispatch(_loadProducts()))
+      .then(()=> dispatch(deleteProduct(product)))
   }
 }
 
+
 const initialState = {
-  products: []
+  products: [],
+  topRated: {}
 }
+
+
 
 const reducer = (state=initialState,action)=> {
   switch(action.type) {
     case LOAD_PRODUCTS:
-      return {...state, products: action.products}
+      let topRating = 0
+      let topRated = {}
+      action.products.forEach(product => {
+        if(product.rating >= topRating) {
+          topRating = product.rating
+          topRated = product
+        }
+      })
+      return {...state, products: action.products, topRated: topRated}
     case CREATE_PRODUCT:
-      return {...state, products: [...state.products, action.product]}
+      if(action.product.rating >= state.topRated.rating) {
+        return {...state, products: [...state.products, action.product], topRated: action.product}
+      } else {
+        return {...state, products: [...state.products, action.product], topRated: {...state.topRated}}
+      }
     case DELETE_PRODUCT:
       const newProducts = state.products.filter( product => product.id !== action.product.id)
-      state = {...state, products: newProducts}
-      break;
+      let top = 0
+      let topProduct = {}
+      newProducts.forEach(product => {
+        if(product.rating >= top) {
+          top = product.rating
+          topProduct = product
+        }
+      })
+
+      return {...state, products: newProducts, topRated: topProduct}
     default: return state
   }
 }

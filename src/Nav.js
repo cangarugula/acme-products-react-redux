@@ -1,12 +1,21 @@
 import React from 'react'
+import { connect } from 'react-redux'
+import {Link} from 'react-router-dom'
 
-const Nav = () => {
+const Nav = ({products,topRated}) => {
   return (
     <ul>
-      <li>Products ()</li>
-      <li>Top Rated ()</li>
+      <Link to='/'><li>Products ({products.length})</li></Link>
+      <Link to={`/${topRated.id}`}><li>Top Rated ({topRated.name})</li></Link>
     </ul>
   )
 }
 
-export default Nav
+const mapStateToProps = ({products,topRated}) => {
+  return {
+    products,
+    topRated
+  }
+}
+
+export default connect(mapStateToProps)(Nav)
